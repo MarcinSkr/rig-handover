@@ -1,6 +1,6 @@
 import { access, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import type { DigestRow, RunStatus } from './types.js';
+import type { DigestRow, RunCounts, RunStatus } from './types.js';
 
 type RunRecord = {
   at: string;
@@ -40,7 +40,7 @@ function parseRunRecord(value: unknown): RunRecord | null {
   };
 }
 
-export async function readNight(runsDir: string, night: string): Promise<DigestRow[]> {
+async function readRuns(runsDir: string, night: string): Promise<RunRecord[]> {
   let contents: string;
   try {
     contents = await readFile(join(runsDir, `${night}.jsonl`), 'utf8');
@@ -48,8 +48,7 @@ export async function readNight(runsDir: string, night: string): Promise<DigestR
     return [];
   }
 
-  const rows = new Map<string, DigestRow>();
-  let malformedLines = 0;
+  const runs: RunRecord[] = [];
 
   for (const line of contents.split(/\r?\n/)) {
     if (line.trim() === '') continue;
@@ -58,16 +57,24 @@ export async function readNight(runsDir: string, night: string): Promise<DigestR
     try {
       parsed = JSON.parse(line) as unknown;
     } catch {
-      malformedLines += 1;
       continue;
     }
 
     const run = parseRunRecord(parsed);
     if (run === null) {
-      malformedLines += 1;
       continue;
     }
 
+    runs.push(run);
+  }
+
+  return runs;
+}
+
+export async function readNight(runsDir: string, night: string): Promise<DigestRow[]> {
+  const rows = new Map<string, DigestRow>();
+
+  for (const run of await readRuns(runsDir, night)) {
     const existing = rows.get(run.job);
     if (existing === undefined) {
       rows.set(run.job, {
@@ -91,8 +98,17 @@ export async function readNight(runsDir: string, night: string): Promise<DigestR
     existing.owner = run.owner;
   }
 
-  void malformedLines;
   return [...rows.values()];
+}
+
+export async function readNightCounts(runsDir: string, night: string): Promise<RunCounts> {
+  const counts: RunCounts = { ok: 0, retry: 0, fail: 0 };
+
+  for (const run of await readRuns(runsDir, night)) {
+    counts[run.status] += 1;
+  }
+
+  return counts;
 }
 
 export async function readDigest(
