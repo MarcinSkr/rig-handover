@@ -21,7 +21,7 @@ export function DigestPage({ night, rows }: { night: string; rows: DigestRow[] }
             </tr>
           </thead>
           <tbody>
-            {[...rows].sort((a, b) => a.job.localeCompare(b.job)).map((row) => (
+            {rows.map((row) => (
               <tr>
                 <td>{row.job}</td>
                 <td>{row.owner ?? '—'}</td>

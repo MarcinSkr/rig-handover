@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { access, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { DigestRow, RunStatus } from './types.js';
 
@@ -93,4 +93,17 @@ export async function readNight(runsDir: string, night: string): Promise<DigestR
 
   void malformedLines;
   return [...rows.values()];
+}
+
+export async function readDigest(
+  runsDir: string,
+  night: string,
+): Promise<DigestRow[] | null> {
+  try {
+    await access(join(runsDir, `${night}.jsonl`));
+  } catch {
+    return null;
+  }
+
+  return (await readNight(runsDir, night)).sort((a, b) => a.job.localeCompare(b.job));
 }
