@@ -1,8 +1,9 @@
 ---
 plan: morning-digest
-status: ready
+status: done
 owner: rook
 opened: 2026-10-29
+issues: https://github.com/MarcinSkr/rig-handover/issues/1, https://github.com/MarcinSkr/rig-handover/issues/2, https://github.com/MarcinSkr/rig-handover/issues/3, https://github.com/MarcinSkr/rig-handover/issues/4, https://github.com/MarcinSkr/rig-handover/issues/5, https://github.com/MarcinSkr/rig-handover/issues/6, https://github.com/MarcinSkr/rig-handover/issues/7, https://github.com/MarcinSkr/rig-handover/issues/8
 ---
 
 # Morning digest
